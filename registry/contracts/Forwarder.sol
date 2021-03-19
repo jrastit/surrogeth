@@ -1,4 +1,3 @@
-pragma experimental ABIEncoderV2;
 pragma solidity ^0.5.10;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -77,6 +76,7 @@ contract Forwarder is Ownable {
      * @param _encodedPayloads Payloads to call each contract in _applicationContract with. Must be encoded as
      *                         with abi.encodePacked.
      */
+    /* require abi encoding
     function batchRelayCall(
         address[] calldata _applicationContracts,
         bytes[] calldata _encodedPayloads
@@ -101,4 +101,5 @@ contract Forwarder is Ownable {
 
         relayer.transfer(totalRelayerFee);
     }
+    */
 }
