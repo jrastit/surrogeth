@@ -72,12 +72,12 @@ const getEthersProvider = network => {
   expect(network).toBe(TEST_NETWORK);
 
   return {
-    getGasPrice: () => ethers.utils.bigNumberify(TEST_GAS_PRICE),
+    getGasPrice: () => ethers.BigNumber.from(TEST_GAS_PRICE),
 
     estimateGas: tx => {
       expect(tx).toStrictEqual(TEST_ETHERS_TX);
 
-      return ethers.utils.bigNumberify(TEST_GAS_ESTIMATE);
+      return ethers.BigNumber.from(TEST_GAS_ESTIMATE);
     },
 
     getTransactionCount: (address, status) => {
@@ -108,7 +108,7 @@ const getEthersProvider = network => {
 const ETHERS_FULL_TX = Object.assign({}, TEST_ETHERS_TX, {
   nonce: NONCE,
   gasLimit: GAS_LIMIT,
-  gasPrice: ethers.utils.bigNumberify(TEST_GAS_PRICE)
+  gasPrice: ethers.BigNumber.from(TEST_GAS_PRICE)
 });
 delete ETHERS_FULL_TX.from;
 
