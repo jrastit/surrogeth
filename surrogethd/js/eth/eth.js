@@ -6,6 +6,8 @@ const { getEthersProvider, getEthersWallet } = require("./engines");
 const { SURROGETH_MIN_TX_PROFIT } = require("../config");
 const { relayerAccount } = require("../utils");
 
+const ethers = require("ethers");
+
 /**
  * @deprecated Gets the fee that this relayer will quote for the provided tx.
  */
@@ -48,14 +50,14 @@ const sendTransaction = async (network, to, data, value) => {
   const gasPrice = await provider.getGasPrice();
   const unsignedTx = {
     to,
-    value,
+    value: ethers.utils.parseUnits(value, "wei"),
     data,
     nonce,
     gasLimit,
     gasPrice
   };
 
-  const signedTx = await signer.sign(unsignedTx);
+  const signedTx = await signer.signTransaction(unsignedTx);
 
   // Returns Promise<TransactionResponse>
   return provider.sendTransaction(signedTx);

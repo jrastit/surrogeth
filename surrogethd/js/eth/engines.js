@@ -47,8 +47,8 @@ const getEthersProvider = network => {
 
 // NOTE: Creates a new provider/wallet on *each* invocation
 const getEthersWallet = network => {
-  const rpcUrl = networkToRpcUrl(network);
-  return new ethers.Wallet(SURROGETH_PRIVATE_KEY, rpcUrl);
+  const provider = getEthersProvider(network);
+  return new ethers.Wallet(SURROGETH_PRIVATE_KEY, provider);
 };
 
 /**

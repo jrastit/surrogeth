@@ -2,7 +2,7 @@ const axios = require("axios");
 const ethers = require("ethers");
 const _ = require("lodash/core");
 
-const { registryABI } = require("./abi");
+//const { registryABI } = require("./abi");
 
 // TODO!
 const DEFAULT_REGISTRY_ADDRESS = {};
@@ -35,12 +35,34 @@ class SurrogethClient {
     provider,
     network = "KOVAN",
     registryAddress = DEFAULT_REGISTRY_ADDRESS[network],
+    registryABI,
     protocol = "https"
   ) {
     this.network = network;
     this.provider = provider;
     this.registryAddress = registryAddress;
     this.protocol = protocol;
+    this.registryABI = registryABI;
+  }
+
+  /**
+   * Set a relayer locator
+   *
+   * @param {locator} location of the wallet of type string.
+   *
+   */
+  async setIPRelayerLocator(
+      localtor,
+  ){
+      let locatorType = 'ip';
+      const contract = new ethers.Contract(
+        this.registryAddress,
+        this.registryABI,
+        this.provider
+      );
+
+      const tx = await contract.setRelayerLocator(await this.provider.address, localtor, locatorType)
+      return await tx.wait()
   }
 
   /**
@@ -59,7 +81,7 @@ class SurrogethClient {
   ) {
     const contract = new ethers.Contract(
       this.registryAddress,
-      registryABI,
+      this.registryABI,
       this.provider
     );
 
@@ -69,6 +91,8 @@ class SurrogethClient {
       LOCATOR_RELAYERS_TYPE
     )).toNumber();
 
+    console.log("totalRelayers", totalRelayers)
+
     // TODO: batch these calls with multicall
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
       const relayerAddress = await contract.relayerByIdx(
@@ -77,6 +101,8 @@ class SurrogethClient {
       );
       addresses.push(relayerAddress);
     }
+
+    console.log("addresses", addresses)
 
     // No registered relayers in the registry contract!
     if (addresses.length === 0) {
@@ -88,7 +114,10 @@ class SurrogethClient {
     for (const address of addresses) {
       const { locator, locatorType } = await contract.relayerToLocator(address);
 
+      console.log("type", Array.from(allowedLocatorTypes), ":", locatorType, ":", locator)
+
       if (allowedLocatorTypes.has(locatorType)) {
+        console.log("type ok")
         toReturn.push({ locator, locatorType, address });
       }
 
@@ -109,7 +138,7 @@ class SurrogethClient {
   async getAvgFee() {
     const contract = new ethers.Contract(
       this.registryAddress,
-      registryABI,
+      this.registryABI,
       this.provider
     );
 

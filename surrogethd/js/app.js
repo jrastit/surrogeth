@@ -61,9 +61,7 @@ app.post(
   [
     check("to").custom(isAddressStr),
     check("data").custom(isTxDataStr),
-    check("value")
-      .isInt()
-      .toInt(),
+    check("value").isInt(),
     check("network").custom(isNetworkStr)
   ],
   async (req, res) => {
@@ -114,9 +112,7 @@ app.post(
     check("token").custom(isAddressStr),
     check("to").custom(isAddressStr),
     check("data").custom(isTxDataStr),
-    check("value")
-      .isInt()
-      .toInt(),
+    check("value").isInt(),
     check("network").custom(isNetworkStr)
   ],
   async (req, res) => {
