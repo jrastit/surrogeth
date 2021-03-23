@@ -137,7 +137,13 @@ const getEthersWallet = network => {
 
       return {
         hash: TEST_TX_HASH,
-        blockNumber: TEST_BLOCK_NUM
+        blockNumber: TEST_BLOCK_NUM,
+        wait: wait = () => {
+            return {
+                hash: TEST_TX_HASH,
+                blockNumber: TEST_BLOCK_NUM,
+            }
+        }
       };
     },
 
