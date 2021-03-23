@@ -5,12 +5,12 @@ const { relayerAccount } = require("../../utils");
 const SIGNED = "0x123";
 const INIT_RELAYER_BALANCE = 10000;
 const GAS_LIMIT = 100;
-const TEST_NETWORK = "LOCAL";
+const TEST_NETWORK = "test";
 
 const TEST_WEB3_TX = {
   to: "0x0000000000000000000000000000000000000001",
   data: "",
-  value: 300,
+  value: "300",
   gas: GAS_LIMIT
 };
 
@@ -56,12 +56,14 @@ const createForkedWeb3 = network => {
   return ret;
 };
 
+
+
 const TEST_GAS_PRICE = 1000;
 const TEST_GAS_ESTIMATE = 32;
 const TEST_ETHERS_TX = {
   to: "0x0000000000000000000000000000000000000001",
   data: "",
-  value: 300,
+  value: ethers.utils.parseUnits("300", "wei"),
   from: relayerAccount.address
 };
 const NONCE = 2;
@@ -95,7 +97,7 @@ const getEthersProvider = network => {
     },
 
     sendTransaction: signedTx => {
-      expect(signedTx).toBe(SIGNED);
+      expect(signedTx).toStrictEqual(TEST_WEB3_TX);
 
       return {
         hash: TEST_TX_HASH,
@@ -116,11 +118,38 @@ const getEthersWallet = network => {
   expect(network).toBe(TEST_NETWORK);
 
   return {
-    sign: tx => {
+    getGasPrice: () => ethers.BigNumber.from(TEST_GAS_PRICE),
+
+    estimateGas: tx => {
+      expect(tx).toStrictEqual(TEST_ETHERS_TX);
+
+      return ethers.BigNumber.from(TEST_GAS_ESTIMATE);
+    },
+
+    getTransactionCount: (status) => {
+      expect(status).toBe("pending");
+
+      return NONCE;
+    },
+
+    sendTransaction: signedTx => {
+      expect(signedTx.to).toMatch("0x0000000000000000000000000000000000000001");
+
+      return {
+        hash: TEST_TX_HASH,
+        blockNumber: TEST_BLOCK_NUM
+      };
+    },
+
+    signTransaction: tx => {
       expect(tx).toStrictEqual(ETHERS_FULL_TX);
 
       return SIGNED;
-    }
+  },
+
+    address: relayerAccount.address,
+
+    provider: getEthersProvider(network),
   };
 };
 

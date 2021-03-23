@@ -6,7 +6,7 @@ const Accounts = require("web3-eth-accounts");
 const accounts = new Accounts();
 
 const { createForkedWeb3 } = require("./engines");
-const { relayerAccount } = require("../utils");
+const { getWallet, getPrivateKey } = require("../configSurrogeth");
 
 /**
  * Sign the provided tx.
@@ -38,7 +38,9 @@ const buildSimTx = async (forkedWeb3, to, data, value) => {
  */
 const simulateTx = async (network, to, data, value) => {
   const forkedWeb3 = createForkedWeb3(network);
-  const { address, privateKey } = relayerAccount;
+  const wallet = getWallet(network)
+  const address = wallet.address
+  const privateKey = getPrivateKey(network)
 
   const tx = await buildSimTx(forkedWeb3, to, data, value);
 
@@ -84,7 +86,9 @@ const simulateERC20Tx = async (network, token, to, data, value) => {
 
   const forkedWeb3 = createForkedWeb3(network);
   const tokenContract = new forkedWeb3.eth.Contract(erc20BalanceOfAbi, token);
-  const { address, privateKey } = relayerAccount;
+  const wallet = getWallet(network)
+  const address = wallet.address
+  const privateKey = getPrivateKey()
 
   const tx = await buildSimTx(forkedWeb3, to, data, value);
 

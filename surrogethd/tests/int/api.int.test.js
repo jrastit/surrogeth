@@ -5,7 +5,7 @@ const SRC_PATH = "../../js";
 let app;
 beforeEach(() => {
   jest.mock(`${SRC_PATH}/eth/engines`);
-  jest.mock(`${SRC_PATH}/config`);
+  jest.mock(`${SRC_PATH}/configEnv`);
   app = require(`${SRC_PATH}/app`);
 });
 
@@ -22,7 +22,7 @@ describe("/address", () => {
 
 describe("/fee", () => {
   test("simply returns the default fee", async () => {
-    const { SURROGETH_FEE } = require(`${SRC_PATH}/config`);
+    const { SURROGETH_FEE } = require(`${SRC_PATH}/configEnv`);
     const response = await request(app).get("/fee");
 
     expect(response.statusCode).toBe(200);
@@ -48,10 +48,9 @@ describe("/submit_tx", () => {
       .send({
         to: TEST_ETHERS_TX.to,
         data: TEST_ETHERS_TX.data,
-        value: TEST_ETHERS_TX.value,
+        value: TEST_ETHERS_TX.value.toString(),
         network: TEST_NETWORK
       });
-
     expect(response.statusCode).toBe(200);
     expect(response.body["txHash"]).toBe(TEST_TX_HASH);
     expect(response.body["block"]).toBe(TEST_BLOCK_NUM);

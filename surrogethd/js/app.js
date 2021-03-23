@@ -17,12 +17,9 @@ const {
 const { isValidRecipient } = require("./eth/engines");
 const {
   SURROGETH_ERC20_MIN_TX_PROFIT,
-  KOVAN_RPC_URL,
-  MAINNET_RPC_URL,
-  LOCAL_RPC_URL,
   SURROGETH_FEE,
   SURROGETH_MIN_TX_PROFIT
-} = require("./config");
+} = require("./configEnv");
 
 const { simulateTx, simulateERC20Tx } = require("./eth/simulationEth");
 const { sendTransaction } = require("./eth/eth");
@@ -65,44 +62,51 @@ app.post(
     check("network").custom(isNetworkStr)
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.info("Invalid parameters on tx submission request");
-      return res.status(422).json({ errors: errors.array() });
-    }
-    const { to, data, value, network } = req.body;
+    try{
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.info("Invalid parameters on tx submission request");
+        return res.status(422).json({ errors: errors.array() });
+      }
+      const { to, data, value, network } = req.body;
 
-    console.info(
-      `Serving tx submission request: to: ${to}, value: ${value}, network: ${network}, data: ${data}`
-    );
+      console.info(
+        `Serving tx submission request: to: ${to}, value: ${value}, network: ${network}, data: ${data}`
+      );
 
-    if (!isValidRecipient(to, network)) {
-      return res
-        .status(403)
-        .json({ msg: `I don't send transactions to ${to}` });
-    }
+      if (!isValidRecipient(to, network)) {
+        return res
+          .status(403)
+          .json({ msg: `I don't send transactions to ${to}` });
+      }
 
-    // simulate the transaction
-    const profit = await simulateTx(network, to, data, value);
+      // simulate the transaction
+      const profit = await simulateTx(network, to, data, value);
 
-    // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
-    // is set to a positive value
-    if (SURROGETH_MIN_TX_PROFIT > 0 && profit <= SURROGETH_MIN_TX_PROFIT) {
-      return res.status(403).json({
-        msg: `Fee too low! Try increasing the fee by ${SURROGETH_MIN_TX_PROFIT -
-          profit} Wei`
+      // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
+      // is set to a positive value
+      if (SURROGETH_MIN_TX_PROFIT > 0 && profit <= SURROGETH_MIN_TX_PROFIT) {
+        return res.status(403).json({
+          msg: `Fee too low! Try increasing the fee by ${SURROGETH_MIN_TX_PROFIT -
+            profit} Wei`
+        });
+      }
+
+      // TODO: Push nonce locking down to submission method and unit test it
+      const { blockNumber, hash } = await lock.acquire(nonceKey, async () => {
+        return sendTransaction(network, to, data, value);
       });
+
+      res.json({
+        block: blockNumber,
+        txHash: hash
+      });
+    }catch(error){
+      throw error;
+      return res
+        .status(499)
+        .json({ msg: error.toString()});
     }
-
-    // TODO: Push nonce locking down to submission method and unit test it
-    const { blockNumber, hash } = await lock.acquire(nonceKey, async () => {
-      return sendTransaction(network, to, data, value);
-    });
-
-    res.json({
-      block: blockNumber,
-      txHash: hash
-    });
   }
 );
 

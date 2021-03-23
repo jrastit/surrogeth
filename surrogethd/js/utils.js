@@ -1,3 +1,4 @@
+const config = require('config');
 const Accounts = require("web3-eth-accounts");
 const accounts = new Accounts();
 
@@ -5,7 +6,7 @@ const {
   SURROGETH_PRIVATE_KEY,
   KOVAN_ALLOWED_RECIPIENTS,
   MAINNET_ALLOWED_RECIPIENTS
-} = require("./config");
+} = require("./configEnv");
 
 const relayerAccount = {
   privateKey: SURROGETH_PRIVATE_KEY,
@@ -27,7 +28,13 @@ const isTxDataStr = s => {
 };
 
 const isNetworkStr = s => {
-  return ["MAINNET", "KOVAN", "LOCAL"].includes(s);
+  if (s == "test"){
+      return true;
+  }
+  if (config.network && config.network.get(s)){
+      return true;
+  }
+  return false;
 };
 
 module.exports = {

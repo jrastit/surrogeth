@@ -3,8 +3,7 @@
  */
 
 const { getEthersProvider, getEthersWallet } = require("./engines");
-const { SURROGETH_MIN_TX_PROFIT } = require("../config");
-const { relayerAccount } = require("../utils");
+const { SURROGETH_MIN_TX_PROFIT } = require("../configEnv");
 
 const ethers = require("ethers");
 
@@ -12,20 +11,19 @@ const ethers = require("ethers");
  * @deprecated Gets the fee that this relayer will quote for the provided tx.
  */
 const getFee = async (network, to, data, value) => {
-  const { address } = relayerAccount;
-  const provider = getEthersProvider(network);
+  const wallet = getEthersWallet(network);
 
-  const gasPrice = await provider.getGasPrice();
-  const gasEstimate = await provider.estimateGas({
+  const gasPrice = await wallet.getGasPrice();
+  const gasEstimate = await wallet.estimateGas({
     to,
     data,
     value,
-    from: address
+    from: wallet.address
   });
 
   // NOTE: May want to change to return a BigNumber
-  const cost = gasPrice.toNumber() * gasEstimate.toNumber();
-  return cost + SURROGETH_MIN_TX_PROFIT;
+  const cost = gasPrice.mul(gasEstimate);
+  return cost.add(SURROGETH_MIN_TX_PROFIT);
 };
 
 const getGasLimit = async provider => {
@@ -40,27 +38,24 @@ const getGasLimit = async provider => {
  * happens in the calling function.
  */
 const sendTransaction = async (network, to, data, value) => {
-  const provider = getEthersProvider(network);
-  const signer = getEthersWallet(network);
+  const wallet = getEthersWallet(network);
 
-  const { address } = relayerAccount;
-
-  const nonce = await provider.getTransactionCount(address, "pending");
-  const gasLimit = await getGasLimit(provider);
-  const gasPrice = await provider.getGasPrice();
+  const nonce = await wallet.getTransactionCount("pending");
+  const gasLimit = await getGasLimit(wallet.provider);
+  const gasPrice = await wallet.getGasPrice();
   const unsignedTx = {
     to,
-    value: ethers.utils.parseUnits(value, "wei"),
+    value: ethers.utils.parseUnits(value.toString(), "wei"),
     data,
     nonce,
     gasLimit,
     gasPrice
   };
 
-  const signedTx = await signer.signTransaction(unsignedTx);
+  //const signedTx = await wallet.signTransaction(unsignedTx);
 
   // Returns Promise<TransactionResponse>
-  return provider.sendTransaction(signedTx);
+  return wallet.sendTransaction(unsignedTx);
 };
 
 module.exports = {

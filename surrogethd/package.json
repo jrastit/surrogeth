@@ -4,15 +4,16 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node js/server.js",
-    "test": "./node_modules/.bin/jest",
-    "test-unit": "./node_modules/.bin/jest unit",
-    "test-int": "./node_modules/.bin/jest int"
+    "server": "NODE_ENV=local-dev node js/server.js",
+    "test": "NODE_ENV=local-test ./node_modules/.bin/jest",
+    "test-unit": "NODE_ENV=local-test ./node_modules/.bin/jest unit",
+    "test-int": "NODE_ENV=local-test ./node_modules/.bin/jest int"
   },
   "author": "lsankar4033",
   "license": "ISC",
   "dependencies": {
     "async-lock": "1.2.8",
+    "config": "^3.3.6",
     "console-stamp": "3.0.0-rc2.0",
     "cors": "^2.8.5",
     "dotenv": "8.2.0",
