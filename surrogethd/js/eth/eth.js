@@ -55,7 +55,8 @@ const sendTransaction = async (network, to, data, value) => {
   //const signedTx = await wallet.signTransaction(unsignedTx);
 
   // Returns Promise<TransactionResponse>
-  return wallet.sendTransaction(unsignedTx);
+  const txResponse = await wallet.sendTransaction(unsignedTx);
+  return await txResponse.wait();
 };
 
 module.exports = {

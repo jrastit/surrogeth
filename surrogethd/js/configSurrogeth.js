@@ -42,6 +42,7 @@ const getPrivateKey = (network) => {
     }
     const privateKeysPath = config.network[network].privateKeysPath;
     const privateKeys = require("../" + privateKeysPath);
+    // For mixer compatibility key are stored in array
     return privateKeys[0];
 }
 
