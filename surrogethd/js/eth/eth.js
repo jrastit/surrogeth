@@ -2,7 +2,11 @@
  * Utilities for interacting with the real (not simulated) Ethereum network.
  */
 
-const { getEthersProvider, getEthersWallet } = require("./engines");
+const {
+    getEthersProvider,
+    getEthersWallet,
+} = require("./engines");
+
 const { SURROGETH_MIN_TX_PROFIT } = require("../configEnv");
 
 const ethers = require("ethers");

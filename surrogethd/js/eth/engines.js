@@ -14,6 +14,7 @@ const {
 
 const {
     getNetworkInfo,
+    getValidRecipient,
 } = require("../configSurrogeth")
 
 /**
@@ -42,21 +43,11 @@ const getEthersWallet = network => {
  * Determines if the specified recipient contract is allowed to receive relayed transactions from this node
  */
 const isValidRecipient = (recipient, network) => {
-  if (network === "kovan") {
-    return (
-      KOVAN_ALLOWED_RECIPIENTS.length === 0 ||
-      KOVAN_ALLOWED_RECIPIENTS.includes(recipient)
-    );
-  } else if (network === "MAINNET") {
-    return (
-      MAINNET_ALLOWED_RECIPIENTS.length === 0 ||
-      MAINNET_ALLOWED_RECIPIENTS.includes(recipient)
-    );
-} else if (network === "ganache") {
-    return true;
-  } else {
-    throw `Network ${network} not recognized!`;
+  recipient = getValidRecipient(network)
+  if (recipient && recipient.length && !recipient.includes(recipient)){
+    return false;
   }
+  return true;
 };
 
 module.exports = {

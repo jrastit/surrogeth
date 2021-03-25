@@ -1,7 +1,6 @@
 ---
 env: 'local-dev'
 
-deployedAddresse: "../../../contracts/deployedAddresses.json"
 surrogethPort: "8123"
 
 
@@ -13,13 +12,6 @@ network:
         token:
             eth:
                 feeAmt: 0.001
-            tkn:
-                decimals: 18
-                feeAmt: 2
-            dai:
-                deployedAddresse: '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa'
-                decimals: 18
-                feeAmt: 2
 
     ganache:
         url: "http://localhost:8545"
@@ -28,6 +20,27 @@ network:
         token:
             eth:
                 feeAmt: 0.001
-            tkn:
-                decimals: 18
-                feeAmt: 0.02
+
+    ropsten:
+        url: "https://ropsten.infura.io/v3/5d37c494621a43558d77c90e368d4022"
+        chainId: 3
+        privateKeysPath: "kovanPrivateKeys.json"
+        token:
+            eth:
+                feeAmt: 0.001
+
+    arbitrum:
+        url: "https://kovan4.arbitrum.io/rpc"
+        chainId: 212984383488152
+        privateKeysPath: "kovanPrivateKeys.json"
+        token:
+            eth:
+                feeAmt: 0.001
+
+    skale:
+        url: "https://dev-testnet-v1-0.skalelabs.com"
+        chainId: 344435
+        privateKeysPath: "kovanPrivateKeys.json"
+        token:
+            eth:
+                feeAmt: 0.001

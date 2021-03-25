@@ -33,7 +33,7 @@ const getSubmitErc20TxRoute = locator => {
 class SurrogethClient {
   constructor(
     provider,
-    network = "KOVAN",
+    network = "kovan",
     registryAddress = DEFAULT_REGISTRY_ADDRESS[network],
     registryABI,
     protocol = "https"
@@ -91,8 +91,6 @@ class SurrogethClient {
       LOCATOR_RELAYERS_TYPE
     )).toNumber();
 
-    console.log("totalRelayers", totalRelayers)
-
     // TODO: batch these calls with multicall
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
       const relayerAddress = await contract.relayerByIdx(
@@ -101,8 +99,6 @@ class SurrogethClient {
       );
       addresses.push(relayerAddress);
     }
-
-    console.log("addresses", addresses)
 
     // No registered relayers in the registry contract!
     if (addresses.length === 0) {
@@ -114,10 +110,7 @@ class SurrogethClient {
     for (const address of addresses) {
       const { locator, locatorType } = await contract.relayerToLocator(address);
 
-      console.log("type", Array.from(allowedLocatorTypes), ":", locatorType, ":", locator)
-
       if (allowedLocatorTypes.has(locatorType)) {
-        console.log("type ok")
         toReturn.push({ locator, locatorType, address });
       }
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const ethers = require('ethers')
 const { check, validationResult } = require("express-validator");
 
 const AsyncLock = require("async-lock");
@@ -20,6 +20,9 @@ const {
   SURROGETH_FEE,
   SURROGETH_MIN_TX_PROFIT
 } = require("./configEnv");
+const {
+    getTokenInfo,
+} = require("./configSurrogeth")
 
 const { simulateTx, simulateERC20Tx } = require("./eth/simulationEth");
 const { sendTransaction } = require("./eth/eth");
@@ -81,14 +84,22 @@ app.post(
       }
 
       // simulate the transaction
-      const profit = await simulateTx(network, to, data, value);
+      const profit = ethers.BigNumber.from(
+          (await simulateTx(network, to, data, value)).toString()
+      );
+      const {isETH, feeWei} = getTokenInfo(network, "eth");
+      console.log("Estimated Profit : ",
+        ethers.utils.formatEther(profit),
+        "/",
+        ethers.utils.formatEther(feeWei)
+      );
+
 
       // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
       // is set to a positive value
-      if (SURROGETH_MIN_TX_PROFIT > 0 && profit <= SURROGETH_MIN_TX_PROFIT) {
+      if (feeWei > 0 && profit.lte(feeWei)) {
         return res.status(403).json({
-          msg: `Fee too low! Try increasing the fee by ${SURROGETH_MIN_TX_PROFIT -
-            profit} Wei`
+          msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatEther(feeWei.sub(profit))} ETH`
         });
       }
 

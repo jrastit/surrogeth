@@ -4,6 +4,11 @@ const ethers = require('ethers');
 
 const surrogethPort = config.surrogethPort;
 
+const getValidRecipient = (network) => {
+    const validRecipient = config.network[network].validRecipient;
+    return validRecipient;
+}
+
 const getNetworkInfo = (network) => {
     if (network == "test"){
         const { getEthersProvider, getEthersWallet } = require("./eth/engines");
@@ -14,9 +19,9 @@ const getNetworkInfo = (network) => {
         }
     }
 
-
     const chainUrl = config.network[network].url;
     const chainId = config.network[network].chainId;
+
     const privateKey = getPrivateKey(network);
 
     const provider = new ethers.providers.JsonRpcProvider(
@@ -74,4 +79,5 @@ module.exports = {
     getTokenInfo,
     getPrivateKey,
     getWallet,
+    getValidRecipient,
 }
