@@ -57,20 +57,40 @@ const getWallet = (network) => {
 
 const getTokenInfo = (network, token) => {
 
-    let isETH = 0;
-    let decimals = config.network[network].token[token].decimals;
-    if (!decimals){
-        decimals = 18;
-        isETH = 1;
-    }
-    const feeAmt = config.network[network].token[token].feeAmt;
+    if (token.startsWith('0x')){
+        for (const tokenName in config.network[network].token)
+        {
+            const tokenStruct = config.network[network].token[tokenName]
+            if (tokenStruct.address == token){
+                const feeAmt = tokenStruct.feeAmt;
+                const decimals = tokenStruct.decimals;
+                const feeWei = ethers.utils.parseUnits(feeAmt.toString(), decimals)
+                return {
+                    isETH: 1,
+                    feeWei: feeWei,
+                    decimals: decimals,
+                }
+            }
+        }
+    }else{
+        let isETH = 0;
+        let decimals = config.network[network].token[token].decimals;
+        if (!decimals){
+            decimals = 18;
+            isETH = 1;
+        }
+        const feeAmt = config.network[network].token[token].feeAmt;
 
-    const feeWei = ethers.utils.parseUnits(feeAmt.toString(), decimals)
+        const feeWei = ethers.utils.parseUnits(feeAmt.toString(), decimals)
 
-    return {
-        isETH: isETH,
-        feeWei: feeWei,
+        return {
+            isETH: isETH,
+            feeWei: feeWei,
+            decimals: decimals,
+        }
     }
+    throw "Network " + network + " Token " + token + " not supported"
+
 }
 
 module.exports = {

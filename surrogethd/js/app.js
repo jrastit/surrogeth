@@ -83,11 +83,12 @@ app.post(
           .json({ msg: `I don't send transactions to ${to}` });
       }
 
+
+      const {isETH, feeWei} = getTokenInfo(network, "eth");
       // simulate the transaction
       const profit = ethers.BigNumber.from(
           (await simulateTx(network, to, data, value)).toString()
       );
-      const {isETH, feeWei} = getTokenInfo(network, "eth");
       console.log("Estimated Profit : ",
         ethers.utils.formatEther(profit),
         "/",
@@ -131,56 +132,63 @@ app.post(
     check("network").custom(isNetworkStr)
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.info("Invalid parameters on tx submission request");
-      return res.status(422).json({ errors: errors.array() });
-    }
-    const { token, to, data, value, network } = req.body;
+    try{
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.info("Invalid parameters on tx submission request");
+        return res.status(422).json({ errors: errors.array() });
+      }
+      const { token, to, data, value, network } = req.body;
 
-    console.info(
-      `Serving ERC20 tx submission request: token: ${token}, to: ${to}, value: ${value}, network: ${network}, data: ${data}`
-    );
+      console.info(
+        `Serving ERC20 tx submission request: token: ${token}, to: ${to}, value: ${value}, network: ${network}, data: ${data}`
+      );
 
-    const parsedTokensMinProfit = JSON.parse(SURROGETH_ERC20_MIN_TX_PROFIT);
-    let tokensAndMinProfit = {};
-    for (let key of Object.keys(parsedTokensMinProfit)) {
-      tokensAndMinProfit[key.toLowerCase()] = parsedTokensMinProfit[key];
-    }
+      if (!isValidRecipient(to, network)) {
+        return res
+          .status(403)
+          .json({ msg: `I don't send transactions to ${to}` });
+      }
 
-    if (Object.keys(tokensAndMinProfit).indexOf(token.toLowerCase()) === -1) {
-      return res.status(422).json({ msg: `Token ${token} not supported` });
-    }
+      try{
+          const {isETH, feeWei, decimals} = getTokenInfo(network, token);
 
-    if (!isValidRecipient(to, network)) {
-      return res
-        .status(403)
-        .json({ msg: `I don't send transactions to ${to}` });
-    }
+          // simulate the transaction
+          const profit = ethers.BigNumber.from(
+              (await simulateERC20Tx(network, token, to, data, value)).toString()
+          );
+          console.log("Estimated Profit : ",
+            ethers.utils.formatUnits(profit, decimals),
+            "/",
+            ethers.utils.formatUnits(feeWei, decimals)
+          );
 
-    // simulate the transaction
-    const profit = await simulateERC20Tx(network, token, to, data, value);
+          // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
+          // is set to a positive value
+          if (feeWei > 0 && profit.lte(feeWei)) {
+            return res.status(403).json({
+              msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatEther(feeWei.sub(profit))} ETH`
+            });
+          }
+      }catch(err){
+          return res.status(422).json({ msg: err.toString() });
+      }
 
-    // only check whether the profit is sufficient if tokensAndMinProfit[token]
-    // is set to a positive value
-    const minProfit = tokensAndMinProfit[token.toLowerCase()];
-
-    if (minProfit > 0 && profit <= minProfit) {
-      return res.status(403).json({
-        msg: `Fee too low! Try increasing the fee by ${SURROGETH_MIN_TX_PROFIT -
-          profit} Wei`
+      // TODO: Push nonce locking down to submission method and unit test it
+      const { blockNumber, hash } = await lock.acquire(nonceKey, async () => {
+        return sendTransaction(network, to, data, value);
       });
+
+      res.json({
+        block: blockNumber,
+        txHash: hash
+      });
+    }catch(error){
+      throw error;
+      return res
+        .status(499)
+        .json({ msg: error.toString()});
     }
-
-    // TODO: Push nonce locking down to submission method and unit test it
-    const { blockNumber, hash } = await lock.acquire(nonceKey, async () => {
-      return sendTransaction(network, to, data, value);
-    });
-
-    res.json({
-      block: blockNumber,
-      txHash: hash
-    });
   }
 );
 

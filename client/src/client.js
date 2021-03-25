@@ -126,7 +126,7 @@ class SurrogethClient {
    * Returns the avg fee seen in the fee registry. This is one heuristic a client could use to determine the
    * fee to broadcast on its tx.
    *
-   * @returns {number|null} The average fee in Wei taken by a relayer in the registry
+   * @returns {ethers.BigNumber|null} The average fee in Wei taken by a relayer in the registry
    */
   async getAvgFee() {
     const contract = new ethers.Contract(
@@ -140,8 +140,8 @@ class SurrogethClient {
     )).toNumber();
 
     // TODO: batch these calls with multicall
-    let totalFeeSum = 0;
-    let totalFeeCount = 0;
+    let totalFeeSum = ethers.BigNumber.from(0);
+    let totalFeeCount = ethers.BigNumber.from(0);
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
       const relayerAddress = await contract.relayerByIdx(
         ALL_RELAYERS_TYPE,
@@ -151,15 +151,15 @@ class SurrogethClient {
       const { feeSum, feeCount } = await contract.relayerToFeeAgg(
         relayerAddress
       );
-      console.log(`Fees: ${feeSum}, Count: ${feeCount}`);
-      totalFeeSum += feeSum.toNumber();
-      totalFeeCount += feeCount.toNumber();
+      console.log(`Fees: ${feeSum.toString()}, Count: ${feeCount.toString()}`);
+      totalFeeSum = totalFeeSum.add(feeSum);
+      totalFeeCount = totalFeeCount.add(feeCount);
     }
 
     if (totalFeeCount == 0) {
       return null;
     } else {
-      return totalFeeSum / totalFeeCount;
+      return totalFeeSum.div(totalFeeCount);
     }
   }
 
@@ -188,6 +188,54 @@ class SurrogethClient {
     const resp = await axios.post(
       `${this.protocol}://${getSubmitTxRoute(locator)}`,
       {
+        to,
+        data,
+        value,
+        network: this.network
+      }
+    );
+
+    if (resp.status !== 200) {
+      console.log(`${resp.status} error submitting tx to relayer ${locator}`);
+    }
+
+    return resp.data.txHash;
+  }
+
+  /**
+   * Submit the specified transaction to the specified relayer.
+   *
+   * @param tokenAddress: string - the address of the erc20 token used
+   * @param {{locator: string, locatorType: string}} relayer - The relayer whose fee to return, as specified
+   * by a locator (i.e. IP address) and locatorType string (i.e. 'ip')
+   * @param {{to: string, data: string, value: number}} tx - The transaction info to submit. 'to' is a hex string
+   * representing the address to send to and 'data' is a hex string or an empty string representing the data
+   * payload of the transaction
+   *
+   * @returns {string|null} The transaction hash of the submitted transaction
+   */
+  async submitTxERC20(tx, relayer, token) {
+    const { locator, locatorType } = relayer;
+    const { to, data, value } = tx;
+
+    if (locatorType !== "ip") {
+      console.log(
+        `Can't communicate with relayer at ${locator} of locatorType ${locatorType} because only IP supported right now.`
+      );
+      return null;
+    }
+
+    if (!token) {
+      console.log(
+        `Token address cannot be null.`
+      );
+      return null;
+    }
+
+    const resp = await axios.post(
+      `${this.protocol}://${getSubmitErc20TxRoute(locator)}`,
+      {
+        token,
         to,
         data,
         value,

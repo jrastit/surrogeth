@@ -88,7 +88,7 @@ const simulateERC20Tx = async (network, token, to, data, value) => {
   const tokenContract = new forkedWeb3.eth.Contract(erc20BalanceOfAbi, token);
   const wallet = getWallet(network)
   const address = wallet.address
-  const privateKey = getPrivateKey()
+  const privateKey = getPrivateKey(network)
 
   const tx = await buildSimTx(forkedWeb3, to, data, value);
 

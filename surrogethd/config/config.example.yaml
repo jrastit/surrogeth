@@ -20,6 +20,10 @@ network:
         token:
             eth:
                 feeAmt: 0.001
+            tkn:
+                address: 0x394BfB86641Bf8cA8A757a318499A580Cc1f26C6
+                decimals: 18
+                feeAmt: 1.9
 
     ropsten:
         url: "https://ropsten.infura.io/v3/5d37c494621a43558d77c90e368d4022"
