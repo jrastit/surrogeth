@@ -92,13 +92,13 @@ app.post(
       console.log("Estimated Profit : ",
         ethers.utils.formatEther(profit),
         "/",
-        ethers.utils.formatEther(feeWei)
+        ethers.utils.formatEther(feeWei),
       );
 
 
       // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
       // is set to a positive value
-      if (feeWei > 0 && profit.lte(feeWei)) {
+      if (feeWei > 0 && profit.lt(feeWei)) {
         return res.status(403).json({
           msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatEther(feeWei.sub(profit))} ETH`
         });
