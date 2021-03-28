@@ -7,45 +7,18 @@ surrogethd is a piece of code anyone can run to act as a surrogeth node offering
 First, clone the repo and `cd` into this directory:
 
 ```
-$ git@github.com:lsankar4033/surrogeth.git
+$ git clone git@github.com:jrastit/surrogeth.git
 $ cd surrogeth/surrogethd
 ```
 
-### Env
+### Config
 
-Whether you're deploying surrogethd as a production instance or just running it for local development and testing, you need to setup a local file containing your env variables. First, create a file called `.env`:
+In the config directory, copy config.example.yaml to local-dev.yaml and modify it as you need
 
-```
-$ touch .env
-```
+### privateKey
 
-Then, add the following configuration variables to this file. You must specify a value for each of them:
-
-```
-SURROGETH_PRIVATE_KEY=0x.............................
-LOCAL_RPC_URL=...............
-KOVAN_RPC_URL=...............
-MAINNET_RPC_URL=...............
-SURROGETH_MIN_TX_PROFIT=...
-SURROGETH_ERC20_MIN_TX_PROFIT='{"0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0": 1000000000000000000}'
-SURROGETH_FEE=...
-KOVAN_ALLOWED_RECIPIENTS=0x............................. 0x.............................
-MAINNET_ALLOWED_RECIPIENTS=0x.............................
-```
-
-See below table for descriptions:
-
-| var                           | description                                                                                                                                                                                                                                                                                                                       |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SURROGETH_PRIVATE_KEY         | hex string representing the private key from which this relayer sends transactions.                                                                                                                                                                                                                                               |
-| LOCAL_RPC_URL                 | URL of the RPC endpoint used to interact with the local network. I.e. Ganache RPC URL.                                                                                                                                                                                                                                            |
-| KOVAN_RPC_URL                 | URL of the RPC endpoint used to interact with the Kovan network. I.e. Infura or Geth/Parity RPC URL.                                                                                                                                                                                                                              |
-| MAINNET_RPC_URL               | URL of the RPC endpoint used to interact with Ethereum mainnet. I.e. Infura or Geth/Parity RPC URL.                                                                                                                                                                                                                               |
-| SURROGETH_MIN_TX_PROFIT       | The minimum profit in Wei that this relayer must get from a transaction to actually relay it. If a transaction is submitted to this relayer that nets the relayer less profit than this value, the relayer will reject it.                                                                                                        |
-| SURROGETH_ERC20_MIN_TX_PROFIT | The minimum profit in the smallest token unit that this relayer must get from a transaction to actually relay it. If a transaction is submitted to this relayer that nets the relayer less profit than this value, the relayer will reject it. This should be a JSON representation of an object {token address: minimum profit}. |
-| SURROGETH_FEE                 | The fee to broadcast to clients                                                                                                                                                                                                                                                                                                   |
-| KOVAN_ALLOWED_RECIPIENTS      | Space-delimited list of allowed contract addresses this relayer will relay for on Kovan. If left blank, it's assumed that all contracts are allowed.                                                                                                                                                                              |
-| MAINNET_ALLOWED_RECIPIENTS    | Space-delimited list of allowed contract addresses this relayer will relay for on Mainnet. If left blank, it's assumed that all contracts are allowed.                                                                                                                                                                            |
+Create file for storing private key as decribed in your config, it can be relative path or absolute path
+the format is ["0x..."]
 
 ### Running for Production Deployment
 

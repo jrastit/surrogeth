@@ -1,17 +1,31 @@
 ---
 env: 'local-dev'
 
+#the port used by the surrogeth deamon
 surrogethPort: "8123"
 
-
+#define all the network the deamon will server
 network:
     kovan:
+        #The URL of the RPC of the network
         url: "https://kovan.infura.io/v3/5d37c494621a43558d77c90e368d4022"
+        #The chainId of the network
         chainId: 42
+        #The private key path for the network in an array format ["key"]
         privateKeysPath: "kovanPrivateKeys.json"
+        #the list of token that are supported
         token:
+            #the default token: eth
             eth:
+                #the minimum fee, lower gain reject the transaction
                 feeAmt: 0.001
+            dai:
+                #the address of the ERC20 token contract
+                address: "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
+                #the number of decimals
+                decimals: 20
+                #the minimum fee in token, lower gain reject the transaction
+                feeAmt: 2
 
     ganache:
         url: "http://localhost:8545"
