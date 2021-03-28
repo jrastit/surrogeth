@@ -70,7 +70,7 @@ const getTokenInfo = (network, token) => {
             for (const tokenName in config.network[network].token)
             {
                 const tokenStruct = config.network[network].token[tokenName]
-                if (tokenStruct.address == token){
+                if (tokenStruct.address && tokenStruct.address.toLowerCase() == token.toLowerCase()){
                     const feeAmt = tokenStruct.feeAmt;
                     const decimals = tokenStruct.decimals;
                     const feeWei = ethers.utils.parseUnits(feeAmt.toString(), decimals)

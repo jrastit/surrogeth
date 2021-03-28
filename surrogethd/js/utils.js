@@ -20,7 +20,6 @@ const isHexStr = s => {
 };
 
 const isAddressStr = s => {
-  console.log("Address", s)
   return s.length == 42 && hexStrRE.test(s);
 };
 

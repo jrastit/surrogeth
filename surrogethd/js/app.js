@@ -74,10 +74,11 @@ app.post(
       const { to, data, value, network } = req.body;
 
       console.info(
-        `Serving tx submission request: to: ${to}, value: ${value}, network: ${network}, data: ${data}`
+        `Serving tx submission request: to: ${to}, value: ${value}, network: ${network}`
       );
 
       if (!isValidRecipient(to, network)) {
+        console.log("Transaction rejected, invalid receiver " + to);
         return res
           .status(403)
           .json({ msg: `I don't send transactions to ${to}` });
@@ -93,12 +94,14 @@ app.post(
         ethers.utils.formatEther(profit),
         "/",
         ethers.utils.formatEther(feeWei),
+        profit.lt(feeWei) ? "profit too low!" : "ok",
       );
 
 
       // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
       // is set to a positive value
       if (feeWei > 0 && profit.lt(feeWei)) {
+        console.log("Transaction rejected, fee too low");
         return res.status(403).json({
           msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatEther(feeWei.sub(profit))} ETH`
         });
@@ -141,7 +144,7 @@ app.post(
       const { token, to, data, value, network } = req.body;
 
       console.info(
-        `Serving ERC20 tx submission request: token: ${token}, to: ${to}, value: ${value}, network: ${network}, data: ${data}`
+        `Serving ERC20 tx submission request: token: ${token}, to: ${to}, value: ${value}, network: ${network}`
       );
 
       if (!isValidRecipient(to, network)) {
@@ -160,12 +163,14 @@ app.post(
           console.log("Estimated Profit : ",
             ethers.utils.formatUnits(profit, decimals),
             "/",
-            ethers.utils.formatUnits(feeWei, decimals)
+            ethers.utils.formatUnits(feeWei, decimals),
+            profit.lt(feeWei) ? "profit too low!" : "ok",
           );
 
           // only check whether the profit is sufficient if SURROGETH_MIN_TX_PROFIT
           // is set to a positive value
-          if (feeWei > 0 && profit.lte(feeWei)) {
+          if (feeWei > 0 && profit.lt(feeWei)) {
+            console.log("Transaction rejected, fee too low");
             return res.status(403).json({
               msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatEther(feeWei.sub(profit))} ETH`
             });

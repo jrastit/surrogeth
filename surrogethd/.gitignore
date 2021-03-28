@@ -5,5 +5,4 @@ node_modules/
 ganachePrivateKeys.json
 kovanPrivateKeys.json
 config/local-dev.yaml
-config/local-test.yaml
 config/surrogeth-mixer.yaml

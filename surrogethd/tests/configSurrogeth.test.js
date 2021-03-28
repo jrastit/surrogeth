@@ -1,14 +1,24 @@
 
 const ethers = require('ethers');
 
+const {
+    surrogethPort,
+    getNetworkInfo,
+    getTokenInfo,
+} = require("../js/configSurrogeth");
+
+const testToken = (token) => {
+    const {
+        isETH,
+        feeWei,
+        decimals,
+    } = getTokenInfo("kovan", token)
+    expect(feeWei.gt(0)).toBeTruthy()
+}
+
 describe("config file", () => {
     test("test config value", async () => {
         console.log("NODE_ENV", process.env.NODE_ENV)
-        const {
-            surrogethPort,
-            getNetworkInfo,
-            getTokenInfo,
-        } = require("../js/configSurrogeth");
 
         expect(surrogethPort).toMatch("8123")
         const networkInfoGanache = getNetworkInfo("ganache")
@@ -21,6 +31,8 @@ describe("config file", () => {
         const walletKovan = networkInfoKovan.wallet
         const balanceKovan = await walletKovan.getBalance()
         console.log("Balance Kovan:", walletKovan.address, ethers.utils.formatUnits(balanceKovan, 18), "ETH")
+        testToken("0x6fB66Fe3a00aFF2fD0a373223592D9Ebe21913eF")
+        testToken("0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa")
         /*
         console.log(getNetworkInfo("ganache"))
         console.log(getNetworkInfo("kovan"))
