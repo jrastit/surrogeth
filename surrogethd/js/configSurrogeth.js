@@ -3,6 +3,7 @@ const config = require('config');
 const ethers = require('ethers');
 
 const surrogethPort = config.surrogethPort;
+const surrogethIp = config.surrogethIp;
 
 const getValidRecipient = (network) => {
     const validRecipient = config.network[network].validRecipient;
@@ -55,6 +56,18 @@ const getWallet = (network) => {
     return getNetworkInfo(network).wallet
 }
 
+const getNetworkConfig = () => {
+    return config.network
+}
+
+const getBroadcasterInfo = (network) => {
+    const forwarderRegistryERC20Address = config.network[network].ForwarderRegistryERC20;
+    return {
+        forwarderRegistryERC20Address,
+    }
+}
+
+
 const getTokenInfo = (network, token) => {
     if (network == "test"){
         if (token == "eth"){
@@ -104,10 +117,13 @@ const getTokenInfo = (network, token) => {
 }
 
 module.exports = {
+    surrogethIp,
     surrogethPort,
     getNetworkInfo,
     getTokenInfo,
     getPrivateKey,
     getWallet,
     getValidRecipient,
+    getNetworkConfig,
+    getBroadcasterInfo,
 }

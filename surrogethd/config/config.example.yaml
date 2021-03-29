@@ -2,7 +2,9 @@
 env: 'local-dev'
 
 #the port used by the surrogeth deamon
-surrogethPort: "8123"
+surrogethPort: 8123
+#external ip for surrogeth
+surrogethIp: "127.0.0.1"
 
 #define all the network the deamon will server
 network:
@@ -13,6 +15,8 @@ network:
         chainId: 42
         #The private key path for the network in an array format ["key"]
         privateKeysPath: "kovanPrivateKeys.json"
+        #the forwarder contract to interact with
+        ForwarderRegistryERC20: "0xBB9C41E86A72580359dd4Bff1a574C19D861966a"
         #the list of token that are supported
         token:
             #the default token: eth
