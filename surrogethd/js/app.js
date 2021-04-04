@@ -178,7 +178,7 @@ app.post(
       }
 
       // TODO: Push nonce locking down to submission method and unit test it
-      const { blockNumber, hash } = await lock.acquire(nonceKey, async () => {
+      const { blockNumber, hash } = await lock.acquire("nonce_" + network, async () => {
         return sendTransaction(network, to, data, value);
       });
 
