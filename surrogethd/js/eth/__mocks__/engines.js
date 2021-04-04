@@ -1,11 +1,21 @@
 const ethers = require("ethers");
 
-const { relayerAccount } = require("../../utils");
+const SURROGETH_PRIVATE_KEY = "0x8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5"
+
+const Accounts = require("web3-eth-accounts");
+const accounts = new Accounts();
+
+
+const relayerAccount = {
+  privateKey: SURROGETH_PRIVATE_KEY,
+  address: accounts.privateKeyToAccount(SURROGETH_PRIVATE_KEY).address
+};
 
 const SIGNED = "0x123";
 const INIT_RELAYER_BALANCE = 10000;
 const GAS_LIMIT = 100;
 const TEST_NETWORK = "test";
+const TEST_TOKEN = "eth";
 
 const TEST_WEB3_TX = {
   to: "0x0000000000000000000000000000000000000001",
@@ -13,6 +23,10 @@ const TEST_WEB3_TX = {
   value: "300",
   gas: GAS_LIMIT
 };
+
+const getFeeWei = (network, token) => {
+    return ethers.BigNumber.from(0);
+}
 
 const createForkedWeb3 = network => {
   expect(network).toBe(TEST_NETWORK);
@@ -168,10 +182,12 @@ module.exports = {
   createForkedWeb3,
   getEthersProvider,
   getEthersWallet,
+  getFeeWei,
   isValidRecipient,
   TEST_WEB3_TX,
   TEST_ETHERS_TX,
   TEST_NETWORK,
+  TEST_TOKEN,
   TEST_GAS_ESTIMATE,
   TEST_GAS_PRICE,
   TEST_TX_HASH,

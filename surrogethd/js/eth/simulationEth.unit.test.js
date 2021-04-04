@@ -1,6 +1,5 @@
 beforeEach(() => {
   jest.mock("./engines");
-  jest.mock("../configEnv");
 });
 
 describe("simulateTx", () => {

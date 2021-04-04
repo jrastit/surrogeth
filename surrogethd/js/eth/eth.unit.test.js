@@ -1,6 +1,5 @@
 beforeEach(() => {
   jest.mock("./engines");
-  jest.mock("../configEnv");
 });
 
 describe("getFee", () => {
@@ -9,16 +8,16 @@ describe("getFee", () => {
     const {
       TEST_ETHERS_TX,
       TEST_NETWORK,
+      TEST_TOKEN,
       TEST_GAS_ESTIMATE,
       TEST_GAS_PRICE
     } = require("./engines");
-    const { SURROGETH_MIN_TX_PROFIT } = require("../configEnv");
 
     const { to, data, value } = TEST_ETHERS_TX;
-    const fee = await getFee(TEST_NETWORK, to, data, value);
+    const fee = await getFee(TEST_NETWORK, TEST_TOKEN, to, data, value);
 
     expect(fee.toNumber()).toBe(
-      TEST_GAS_ESTIMATE * TEST_GAS_PRICE + SURROGETH_MIN_TX_PROFIT
+      TEST_GAS_ESTIMATE * TEST_GAS_PRICE + 0
     );
   });
 });

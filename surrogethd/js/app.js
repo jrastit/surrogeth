@@ -9,26 +9,22 @@ const AsyncLock = require("async-lock");
 require("console-stamp")(console);
 
 const {
-  relayerAccount,
   isTxDataStr,
   isAddressStr,
   isNetworkStr
 } = require("./utils");
 const { isValidRecipient } = require("./eth/engines");
-const {
-  SURROGETH_ERC20_MIN_TX_PROFIT,
-  SURROGETH_FEE,
-  SURROGETH_MIN_TX_PROFIT
-} = require("./configEnv");
+
 const {
     getTokenInfo,
+    getAllAddress,
+    getAllFee,
 } = require("./configSurrogeth")
 
 const { simulateTx, simulateERC20Tx } = require("./eth/simulationEth");
 const { sendTransaction } = require("./eth/eth");
 
 const lock = new AsyncLock();
-const nonceKey = `nonce_${relayerAccount.address}`;
 
 const app = express();
 
@@ -48,12 +44,14 @@ app.use(express.json());
 
 app.get("/address", (req, res) => {
   console.info("Serving address request");
-  res.json({ address: relayerAccount.address });
+  //TODO aswer all addresses
+  res.json(getAllAddress());
 });
 
 app.get("/fee", async (req, res) => {
   console.info("Serving fee request");
-  res.json({ fee: SURROGETH_FEE });
+  //Todo answer fee for each network and token
+  res.json(getAllFee());
 });
 
 app.post(
@@ -108,7 +106,7 @@ app.post(
       }
 
       // TODO: Push nonce locking down to submission method and unit test it
-      const { blockNumber, hash } = await lock.acquire(nonceKey, async () => {
+      const { blockNumber, hash } = await lock.acquire("nonce_" + network, async () => {
         return sendTransaction(network, to, data, value);
       });
 

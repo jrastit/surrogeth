@@ -1,1 +1,22 @@
-config.example.yaml
+---
+env: 'local-dev'
+
+#the port used by the surrogeth deamon
+surrogethPort: 8123
+#external ip for surrogeth
+surrogethIp: "127.0.0.1"
+
+#define all the network the deamon will server
+network:
+
+    ganache:
+        url: "http://localhost:8545"
+        chainId: 1337
+        privateKeysPath: "ganachePrivateKeys.json"
+        token:
+            eth:
+                feeAmt: 0.001
+            tkn:
+                address: "0x394BfB86641Bf8cA8A757a318499A580Cc1f26C6"
+                decimals: 18
+                feeAmt: 1.9

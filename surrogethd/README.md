@@ -22,7 +22,7 @@ the format is ["0x..."]
 
 ### Running for Production Deployment
 
-First, make sure you've set up a proper `.env` file.
+First, make sure you've set up a proper `local-dev.yaml` file.
 
 The relayer is deployed as a single Docker container. To start, check out the [Docker docs](https://docs.docker.com) and install Docker.
 
@@ -49,7 +49,7 @@ $ curl localhost:$YOUR_PORT_HERE/address
 
 ### Running for Local Development
 
-First, make sure you've set up a proper `.env` file.
+First, make sure you've set up a proper `local-dev.yaml` file.
 
 Now, install nodejs (> v10.0.0) and npm however you prefer.
 
@@ -73,7 +73,7 @@ Finally, check that the server is running as expected:
 
 ```
 $ curl localhost:8080/address
-{"address":"0x.........."}
+{"ganache":"0x.........."}
 ```
 
 ### Testing

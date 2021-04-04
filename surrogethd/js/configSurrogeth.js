@@ -44,7 +44,7 @@ const getNetworkInfo = (network) => {
 
 const getPrivateKey = (network) => {
     if (network == "test"){
-        return "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d";
+        return "0x8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5";
     }
     const privateKeysPath = config.network[network].privateKeysPath;
     const privateKeys = require("../" + privateKeysPath);
@@ -67,13 +67,35 @@ const getBroadcasterInfo = (network) => {
     }
 }
 
+const getAllAddress = () => {
+    address = {}
+    for (const network in config.network){
+        address[network] = getWallet(network).address;
+    }
+    return address
+}
+
+const getAllFee = () => {
+    fee = {}
+    for (const network in config.network){
+        fee[network] = {}
+        for (const token in config.network[network].token){
+            const {feeWei, tokenAddress} = getTokenInfo(network, token)
+            fee[network][token] = {feeWei: feeWei.toString()}
+            if (tokenAddress){
+                fee[network][token]["address"] = tokenAddress
+            }
+        }
+    }
+    return fee
+}
 
 const getTokenInfo = (network, token) => {
     if (network == "test"){
         if (token == "eth"){
             return {
                 isETH: 1,
-                feeWei: 0,
+                feeWei: ethers.BigNumber.from(0),
                 decimals: 18,
             }
         }
@@ -90,6 +112,7 @@ const getTokenInfo = (network, token) => {
                     return {
                         isETH: 0,
                         feeWei: feeWei,
+                        tokenAddress: tokenStruct.address,
                         decimals: decimals,
                     }
                 }
@@ -105,9 +128,12 @@ const getTokenInfo = (network, token) => {
 
             const feeWei = ethers.utils.parseUnits(feeAmt.toString(), decimals)
 
+            const tokenAddress = config.network[network].token[token].address;
+
             return {
                 isETH: isETH,
                 feeWei: feeWei,
+                tokenAddress: tokenAddress,
                 decimals: decimals,
             }
         }
@@ -126,4 +152,6 @@ module.exports = {
     getValidRecipient,
     getNetworkConfig,
     getBroadcasterInfo,
+    getAllAddress,
+    getAllFee,
 }

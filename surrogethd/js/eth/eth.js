@@ -5,16 +5,15 @@
 const {
     getEthersProvider,
     getEthersWallet,
+    getFeeWei,
 } = require("./engines");
-
-const { SURROGETH_MIN_TX_PROFIT } = require("../configEnv");
 
 const ethers = require("ethers");
 
 /**
  * @deprecated Gets the fee that this relayer will quote for the provided tx.
  */
-const getFee = async (network, to, data, value) => {
+const getFee = async (network, token, to, data, value) => {
   const wallet = getEthersWallet(network);
 
   const gasPrice = await wallet.getGasPrice();
@@ -27,7 +26,8 @@ const getFee = async (network, to, data, value) => {
 
   // NOTE: May want to change to return a BigNumber
   const cost = gasPrice.mul(gasEstimate);
-  return cost.add(SURROGETH_MIN_TX_PROFIT);
+  const fee  = getFeeWei(network, token);
+  return cost.add(fee);
 };
 
 const getGasLimit = async provider => {

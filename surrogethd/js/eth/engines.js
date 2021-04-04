@@ -7,12 +7,6 @@ const ethers = require("ethers");
 const Web3 = require("web3");
 
 const {
-  SURROGETH_PRIVATE_KEY,
-  KOVAN_ALLOWED_RECIPIENTS,
-  MAINNET_ALLOWED_RECIPIENTS
-} = require("../configEnv");
-
-const {
     getNetworkInfo,
     getValidRecipient,
 } = require("../configSurrogeth")
@@ -34,6 +28,11 @@ const getEthersProvider = network => {
   return getNetworkInfo(network).wallet.provider
 };
 
+const getFeeWei = (network, token) => {
+    const {feeWei} = getTokenInfo(network, token);
+    return feeWei;
+}
+
 // NOTE: Creates a new provider/wallet on *each* invocation
 const getEthersWallet = network => {
   return getNetworkInfo(network).wallet
@@ -54,5 +53,6 @@ module.exports = {
   createForkedWeb3,
   getEthersProvider,
   getEthersWallet,
-  isValidRecipient
+  isValidRecipient,
+  getFeeWei,
 };

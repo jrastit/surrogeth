@@ -5,28 +5,28 @@ const SRC_PATH = "../../js";
 let app;
 beforeEach(() => {
   jest.mock(`${SRC_PATH}/eth/engines`);
-  jest.mock(`${SRC_PATH}/configEnv`);
   app = require(`${SRC_PATH}/app`);
 });
 
 describe("/address", () => {
   test("returns configured address as expected", async () => {
-    const { relayerAccount } = require(`${SRC_PATH}/utils`);
 
     const response = await request(app).get("/address");
 
     expect(response.statusCode).toBe(200);
-    expect(response.body["address"]).toBe(relayerAccount.address);
+    console.log(response.body)
+    expect(response.body["ganache"]).toBe("0x627306090abaB3A6e1400e9345bC60c78a8BEf57");
   });
 });
 
 describe("/fee", () => {
   test("simply returns the default fee", async () => {
-    const { SURROGETH_FEE } = require(`${SRC_PATH}/configEnv`);
     const response = await request(app).get("/fee");
 
     expect(response.statusCode).toBe(200);
-    expect(response.body["fee"]).toBe(SURROGETH_FEE);
+    console.log(response.body)
+    expect(response.body["ganache"]["eth"].feeWei).toBe("1000000000000000");
+    expect(response.body["ganache"]["tkn"].feeWei).toBe("1900000000000000000");
   });
 });
 
