@@ -90,7 +90,7 @@ class SurrogethClient {
     const totalRelayers = (await contract.relayersCount(
       LOCATOR_RELAYERS_TYPE
     )).toNumber();
-
+    //console.log("totalRelayers", totalRelayers)
     // TODO: batch these calls with multicall
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
       const relayerAddress = await contract.relayerByIdx(
@@ -104,18 +104,14 @@ class SurrogethClient {
     if (addresses.length === 0) {
       return [];
     }
-
+    //console.log("addresses", addresses)
     // Iterate backwards through addresses until we hit 'numRelayers' of an allowed locator type
     let toReturn = [];
     for (const address of addresses) {
       const { locator, locatorType } = await contract.relayerToLocator(address);
-
+      //console.log("info", address, locator, locatorType)
       if (allowedLocatorTypes.has(locatorType)) {
         toReturn.push({ locator, locatorType, address });
-      }
-
-      if (toReturn.length >= numRelayers) {
-        break;
       }
     }
 
