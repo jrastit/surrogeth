@@ -36,13 +36,15 @@ class SurrogethClient {
     network = "kovan",
     registryAddress = DEFAULT_REGISTRY_ADDRESS[network],
     registryABI,
-    protocol = "https"
+    protocol = "https",
+    token = null
   ) {
     this.network = network;
     this.provider = provider;
     this.registryAddress = registryAddress;
     this.protocol = protocol;
     this.registryABI = registryABI;
+    this.token = token;
   }
 
   /**
@@ -61,7 +63,18 @@ class SurrogethClient {
         this.provider
       );
 
-      const tx = await contract.setRelayerLocator(await this.provider.address, localtor, locatorType)
+      const tx = this.token ?
+        await contract.setRelayerLocatorERC20(
+          await this.provider.address,
+          localtor,
+          locatorType,
+          this.token
+        ):
+        await contract.setRelayerLocator(
+          await this.provider.address,
+          localtor,
+          locatorType
+        );
       return await tx.wait()
   }
 
@@ -86,17 +99,27 @@ class SurrogethClient {
     );
 
     const addresses = [];
-
-    const totalRelayers = (await contract.relayersCount(
-      LOCATOR_RELAYERS_TYPE
-    )).toNumber();
-    //console.log("totalRelayers", totalRelayers)
+    const totalRelayers = this.token ?
+        (await contract.relayersCountERC20(
+          LOCATOR_RELAYERS_TYPE,
+          this.token
+        )).toNumber():
+        (await contract.relayersCount(
+          LOCATOR_RELAYERS_TYPE
+        )).toNumber();
+    console.log("totalRelayers", totalRelayers, "token", this.token)
     // TODO: batch these calls with multicall
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
-      const relayerAddress = await contract.relayerByIdx(
-        LOCATOR_RELAYERS_TYPE,
-        relayerId
-      );
+      const relayerAddress = this.token ?
+        await contract.relayerByIdxERC20(
+          LOCATOR_RELAYERS_TYPE,
+          relayerId,
+          this.token
+        ):
+        await contract.relayerByIdx(
+          LOCATOR_RELAYERS_TYPE,
+          relayerId
+        );
       addresses.push(relayerAddress);
     }
 
@@ -108,10 +131,26 @@ class SurrogethClient {
     // Iterate backwards through addresses until we hit 'numRelayers' of an allowed locator type
     let toReturn = [];
     for (const address of addresses) {
-      const { locator, locatorType } = await contract.relayerToLocator(address);
+      const {
+          locator,
+          locatorType
+      } = await contract.relayerToLocator(
+          address,
+      );
+      const {
+          feeSum,
+          feeCount
+      } = this.token ?
+        await contract.relayerToFeeAggERC20(
+          address,
+          this.token
+        ):
+        await contract.relayerToFeeAgg(
+          address
+        );
       //console.log("info", address, locator, locatorType)
       if (allowedLocatorTypes.has(locatorType)) {
-        toReturn.push({ locator, locatorType, address });
+        toReturn.push({ locator, locatorType, address, feeSum, feeCount });
       }
     }
 
@@ -131,22 +170,41 @@ class SurrogethClient {
       this.provider
     );
 
-    const totalRelayers = (await contract.relayersCount(
-      ALL_RELAYERS_TYPE
-    )).toNumber();
+    const totalRelayers = this.token ?
+      (await contract.relayersCountERC20(
+        ALL_RELAYERS_TYPE,
+        this.token
+      )).toNumber():
+      totalRelayers = (await contract.relayersCount(
+        ALL_RELAYERS_TYPE
+      )).toNumber();
 
     // TODO: batch these calls with multicall
     let totalFeeSum = ethers.BigNumber.from(0);
     let totalFeeCount = ethers.BigNumber.from(0);
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
-      const relayerAddress = await contract.relayerByIdx(
-        ALL_RELAYERS_TYPE,
-        relayerId
-      );
+      const relayerAddress = this.token ?
+        await contract.relayerByIdxERC20(
+          ALL_RELAYERS_TYPE,
+          relayerId,
+          this.token
+        ):
+        await contract.relayerByIdx(
+          ALL_RELAYERS_TYPE,
+          relayerId
+        );
 
-      const { feeSum, feeCount } = await contract.relayerToFeeAgg(
-        relayerAddress
-      );
+      const {
+          feeSum,
+          feeCount
+      } = this.token ?
+        await forwarderRegistryERC20Contract.relayerToFeeAggERC20(
+            relayerAddress,
+            this.token
+        ):
+        await forwarderRegistryERC20Contract.relayerToFeeAgg(
+          relayerAddress
+        );
       console.log(`Fees: ${feeSum.toString()}, Count: ${feeCount.toString()}`);
       totalFeeSum = totalFeeSum.add(feeSum);
       totalFeeCount = totalFeeCount.add(feeCount);
@@ -181,15 +239,27 @@ class SurrogethClient {
       return null;
     }
 
-    const resp = await axios.post(
-      `${this.protocol}://${getSubmitTxRoute(locator)}`,
-      {
-        to,
-        data,
-        value,
-        network: this.network
-      }
-    );
+
+    const resp = this.token ?
+        await axios.post(
+          `${this.protocol}://${getSubmitErc20TxRoute(locator)}`,
+          {
+            token: this.token,
+            to,
+            data,
+            value,
+            network: this.network
+          }
+        ):
+        await axios.post(
+          `${this.protocol}://${getSubmitTxRoute(locator)}`,
+          {
+            to,
+            data,
+            value,
+            network: this.network
+          }
+        );
 
     if (resp.status !== 200) {
       console.log(`${resp.status} error submitting tx to relayer ${locator}`);

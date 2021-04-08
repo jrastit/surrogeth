@@ -60,6 +60,10 @@ const getNetworkConfig = () => {
     return config.network
 }
 
+const getTokenConfig = (network) => {
+    return config.network[network] ? config.network[network].token : null
+}
+
 const getBroadcasterInfo = (network) => {
     const forwarderRegistryERC20Address = config.network[network].ForwarderRegistryERC20;
     return {
@@ -151,6 +155,7 @@ module.exports = {
     getWallet,
     getValidRecipient,
     getNetworkConfig,
+    getTokenConfig,
     getBroadcasterInfo,
     getAllAddress,
     getAllFee,
