@@ -107,7 +107,7 @@ class SurrogethClient {
         (await contract.relayersCount(
           LOCATOR_RELAYERS_TYPE
         )).toNumber();
-    console.log("totalRelayers", totalRelayers, "token", this.token)
+    //console.log("totalRelayers", totalRelayers, "token", this.token)
     // TODO: batch these calls with multicall
     for (var relayerId = 0; relayerId < totalRelayers; relayerId++) {
       const relayerAddress = this.token ?
