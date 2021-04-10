@@ -142,8 +142,8 @@ class SurrogethClient {
           feeCount
       } = this.token ?
         await contract.relayerToFeeAggERC20(
+          this.token,
           address,
-          this.token
         ):
         await contract.relayerToFeeAgg(
           address
@@ -199,8 +199,8 @@ class SurrogethClient {
           feeCount
       } = this.token ?
         await forwarderRegistryERC20Contract.relayerToFeeAggERC20(
-            relayerAddress,
-            this.token
+            this.token,
+            relayerAddress
         ):
         await forwarderRegistryERC20Contract.relayerToFeeAgg(
           relayerAddress

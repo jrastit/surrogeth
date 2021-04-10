@@ -46,12 +46,7 @@ const isRegisteredBroadcaster = async (
             ));
         if (relayerAddress && relayerAddress.toLowerCase() == (await wallet.address).toLowerCase()){
             //if we found the relayer, check if the ip is ok
-            const {locator, locatorType} = tokenAddress ?
-                await forwarderRegistryERC20.relayerToLocatorERC20(
-                    relayerAddress,
-                    tokenAddress
-                ):
-                await forwarderRegistryERC20.relayerToLocator(
+            const {locator, locatorType} = await forwarderRegistryERC20.relayerToLocator(
                     relayerAddress
                 );
             if (locatorType == "ip" && locator == surrogethIp + ":" + surrogethPort){
