@@ -13,12 +13,15 @@ const {
   isAddressStr,
   isNetworkStr
 } = require("./utils");
-const { isValidRecipient } = require("./eth/engines");
+const {
+    isValidRecipient,
+    getEthersWallet,
+ } = require("./eth/engines");
 
 const {
-    getTokenInfo,
-    getAllAddress,
-    getAllFee,
+  getTokenInfo,
+  getAllAddress,
+  getAllFee,
 } = require("./configSurrogeth")
 
 const { simulateTx, simulateERC20Tx } = require("./eth/simulationEth");
@@ -53,6 +56,44 @@ app.get("/fee", async (req, res) => {
   //Todo answer fee for each network and token
   res.json(getAllFee());
 });
+
+app.post(
+  "/fee_token",
+  [
+    check("token").custom(isAddressStr),
+    check("network").custom(isNetworkStr)
+  ],
+  async (req, res) => {
+    const { token, network } = req.body;
+    const {feeWei} = getTokenInfo(network, token);
+    res.json({
+      fee: feeWei.toString()
+    });
+  }
+);
+
+app.post(
+  "/fee_eth",
+  [
+    check("txGas").isInt(),
+    check("network").custom(isNetworkStr)
+  ],
+  async (req, res) => {
+    const { txGas, network } = req.body;
+    const {feeWei} = getTokenInfo(network, 'eth');
+    if (txGas){
+        const wallet = getEthersWallet(network);
+        const gasPrice = await wallet.getGasPrice();
+        res.json({
+          fee: feeWei.add(gasPrice.mul(ethers.BigNumber.from(txGas))).toString()
+        });
+    }else{
+        res.json({
+          fee: feeWei.toString()
+        });
+    }
+  }
+);
 
 app.post(
   "/submit_tx",
@@ -115,6 +156,7 @@ app.post(
         txHash: hash
       });
     }catch(error){
+      console.log(error)
       throw error;
       return res
         .status(499)

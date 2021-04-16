@@ -30,6 +30,19 @@ describe("/fee", () => {
   });
 });
 
+describe("/fee_eth", () => {
+  test("simply returns the eth fee", async () => {
+      const response = await request(app)
+        .post("/fee_eth")
+        .type("json")
+        .send({
+          network: "ganache"
+        });
+      expect(response.statusCode).toBe(200);
+      expect(response.body["fee"]).toBe("1000000000000000");
+  });
+});
+
 // TODO: Tests for invalid query params
 describe("/submit_tx", () => {
   test("submits the tx properly based on query params", async () => {

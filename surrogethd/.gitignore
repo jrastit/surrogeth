@@ -2,7 +2,6 @@ node_modules/
 */.env
 .env
 .node/
-ganachePrivateKeys.json
 kovanPrivateKeys.json
 config/local-dev.yaml
 config/surrogeth-mixer.yaml

@@ -12,7 +12,7 @@ network:
     ganache:
         url: "http://localhost:8545"
         chainId: 1337
-        privateKeysPath: "ganachePrivateKeys.json"
+        privateKeysPath: "config/ganachePrivateKeys.json"
         token:
             eth:
                 feeAmt: 0.001

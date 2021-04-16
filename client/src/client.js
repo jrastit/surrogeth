@@ -26,6 +26,14 @@ const getSubmitErc20TxRoute = locator => {
   return `${locator}/submit_erc20_tx`;
 };
 
+const getFeeETHRoute = locator => {
+  return `${locator}/fee_eth`;
+};
+
+const getFeeTokenRoute = locator => {
+  return `${locator}/fee_token`;
+};
+
 /**
  * Class representing a single surrogeth client. Maintains state about which relayers it's already tried to
  * communicate with.
@@ -37,7 +45,7 @@ class SurrogethClient {
     registryAddress = DEFAULT_REGISTRY_ADDRESS[network],
     registryABI,
     protocol = "https",
-    token = null
+    token = undefined
   ) {
     this.network = network;
     this.provider = provider;
@@ -82,14 +90,12 @@ class SurrogethClient {
    * Get `numRelayers` relayers with locators from the contract. If < `numRelayers` in contract with locators,
    * return all relayers from contract
    *
-   * @param {number} numRelayers - The number of relayers to return.
    * @param {Set<string>} allowedLocatorTypes - The locator types to include.
    *
-   * @returns {Array<{locator: string, locatorType: string, burn: number, address: string}>} An array of
+   * @returns {locator: string, locatorType: string, address: string, feeSun: ethers.BigNumber, feeCount:ethers.BigNumber}[]>} An array of
    * information objects corresponding to relayers
    */
   async getBroadcasters(
-    numRelayers = 1,
     allowedLocatorTypes = new Set(["ip"])
   ) {
     const contract = new ethers.Contract(
@@ -156,6 +162,67 @@ class SurrogethClient {
 
     return toReturn;
   }
+  /**
+   * Get the fee associatred to the broadcaster, if the transaction will be in eth,
+   * it need to add the transaction fee calculated from txGas
+   *
+   * @param {broadcaster} broadcaster - The Broadcaster to add fee information
+   * @param {number} txGas - The gas expected to be used by the transaction
+   *
+   * @returns {{locator: string, locatorType: string, address: string, feeSun: ethers.BigNumber, feeCount:ethers.BigNumber, fee: ethers.BigNumber}}
+   * An array of information objects corresponding to relayers
+   *
+   */
+  async getBroadcasterFee(
+      broadcaster,
+      txGas,
+  ){
+      const { locator, locatorType } = broadcaster;
+
+      if (locatorType !== "ip") {
+        console.log(
+          `Can't communicate with relayer at ${locator} of locatorType ${locatorType} because only IP supported right now.`
+        );
+        return null;
+      }
+
+      //for Testing
+      locator.replace("127.0.0.1", "localhost")
+      console.log(locator)
+
+      try{
+          const resp = this.token ?
+              await axios.post(
+                `${this.protocol}://${getFeeTokenRoute(locator)}`,
+                {
+                  token: this.token,
+                  network: this.network
+                }
+              ):
+              await axios.post(
+                `${this.protocol}://${getFeeETHRoute(locator)}`,
+                {
+                  txGas: txGas,
+                  network: this.network
+                }
+              );
+
+          if (resp.status !== 200) {
+            console.log(`${resp.status} error submitting tx to relayer ${locator}`);
+          }
+
+          if (resp.data.fee){
+            broadcaster.fee = ethers.BigNumber.from(resp.data.fee);
+            //add the cost of the transaction for ETH
+          }
+
+      } catch (error){
+          broadcaster.error = error;
+          //If Brodcaster connection error fee is not set
+      }
+
+      return broadcaster
+    }
 
   /**
    * Returns the avg fee seen in the fee registry. This is one heuristic a client could use to determine the
@@ -175,7 +242,7 @@ class SurrogethClient {
         ALL_RELAYERS_TYPE,
         this.token
       )).toNumber():
-      totalRelayers = (await contract.relayersCount(
+      (await contract.relayersCount(
         ALL_RELAYERS_TYPE
       )).toNumber();
 
@@ -198,11 +265,11 @@ class SurrogethClient {
           feeSum,
           feeCount
       } = this.token ?
-        await forwarderRegistryERC20Contract.relayerToFeeAggERC20(
+        await contract.relayerToFeeAggERC20(
             this.token,
             relayerAddress
         ):
-        await forwarderRegistryERC20Contract.relayerToFeeAgg(
+        await contract.relayerToFeeAgg(
           relayerAddress
         );
       console.log(`Fees: ${feeSum.toString()}, Count: ${feeCount.toString()}`);
@@ -260,7 +327,7 @@ class SurrogethClient {
             network: this.network
           }
         );
-
+    console.log(resp.status)
     if (resp.status !== 200) {
       console.log(`${resp.status} error submitting tx to relayer ${locator}`);
     }
