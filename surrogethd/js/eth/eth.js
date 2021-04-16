@@ -31,6 +31,7 @@ const getFee = async (network, token, to, data, value) => {
 };
 
 const getGasLimit = async provider => {
+
   const blockNum = await provider.getBlockNumber();
   const block = await provider.getBlock(blockNum);
 
@@ -45,15 +46,15 @@ const sendTransaction = async (network, to, data, value) => {
   const wallet = getEthersWallet(network);
 
   const nonce = await wallet.getTransactionCount("pending");
-  const gasLimit = await getGasLimit(wallet.provider);
-  const gasPrice = await wallet.getGasPrice();
+  //const gasLimit = await getGasLimit(wallet.provider);
+  //const gasPrice = await wallet.getGasPrice();
   const unsignedTx = {
     to,
     value: ethers.utils.parseUnits(value.toString(), "wei"),
     data,
     nonce,
-    gasLimit,
-    gasPrice
+    //gasLimit,
+    //gasPrice
   };
 
   //const signedTx = await wallet.signTransaction(unsignedTx);

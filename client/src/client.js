@@ -180,15 +180,11 @@ class SurrogethClient {
       const { locator, locatorType } = broadcaster;
 
       if (locatorType !== "ip") {
-        console.log(
+        console.error(
           `Can't communicate with relayer at ${locator} of locatorType ${locatorType} because only IP supported right now.`
         );
         return null;
       }
-
-      //for Testing
-      locator.replace("127.0.0.1", "localhost")
-      console.log(locator)
 
       try{
           const resp = this.token ?
@@ -208,7 +204,7 @@ class SurrogethClient {
               );
 
           if (resp.status !== 200) {
-            console.log(`${resp.status} error submitting tx to relayer ${locator}`);
+            console.error(`${resp.status} error submitting tx to relayer ${locator}`);
           }
 
           if (resp.data.fee){
@@ -272,7 +268,7 @@ class SurrogethClient {
         await contract.relayerToFeeAgg(
           relayerAddress
         );
-      console.log(`Fees: ${feeSum.toString()}, Count: ${feeCount.toString()}`);
+      console.error(`Fees: ${feeSum.toString()}, Count: ${feeCount.toString()}`);
       totalFeeSum = totalFeeSum.add(feeSum);
       totalFeeCount = totalFeeCount.add(feeCount);
     }
@@ -300,7 +296,7 @@ class SurrogethClient {
     const { to, data, value } = tx;
 
     if (locatorType !== "ip") {
-      console.log(
+      console.error(
         `Can't communicate with relayer at ${locator} of locatorType ${locatorType} because only IP supported right now.`
       );
       return null;
@@ -327,9 +323,9 @@ class SurrogethClient {
             network: this.network
           }
         );
-    console.log(resp.status)
+    //console.log(resp.status)
     if (resp.status !== 200) {
-      console.log(`${resp.status} error submitting tx to relayer ${locator}`);
+      console.error(`${resp.status} error submitting tx to relayer ${locator}`);
     }
 
     return resp.data.txHash;
@@ -352,14 +348,14 @@ class SurrogethClient {
     const { to, data, value } = tx;
 
     if (locatorType !== "ip") {
-      console.log(
+      console.error(
         `Can't communicate with relayer at ${locator} of locatorType ${locatorType} because only IP supported right now.`
       );
       return null;
     }
 
     if (!token) {
-      console.log(
+      console.error(
         `Token address cannot be null.`
       );
       return null;
@@ -377,7 +373,8 @@ class SurrogethClient {
     );
 
     if (resp.status !== 200) {
-      console.log(`${resp.status} error submitting tx to relayer ${locator}`);
+      console.error(`${resp.status} error submitting tx to relayer ${locator}`);
+      return null;
     }
 
     return resp.data.txHash;
