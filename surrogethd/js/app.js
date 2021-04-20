@@ -80,13 +80,16 @@ app.post(
   ],
   async (req, res) => {
     const { txGas, network } = req.body;
-    const {feeWei} = getTokenInfo(network, 'eth');
+    const {feeWei, decimals} = getTokenInfo(network, 'eth');
     if (txGas){
         const wallet = getEthersWallet(network);
         const gasPrice = await wallet.getGasPrice();
         res.json({
           fee: feeWei.add(gasPrice.mul(ethers.BigNumber.from(txGas))).toString()
         });
+        console.log(network,
+            "gasPrice",
+            gasPrice.toString())
     }else{
         res.json({
           fee: feeWei.toString()
@@ -124,12 +127,13 @@ const submitTx = async (
             .json({ msg: `I don't send transactions to ${to}` });
         }
 
+        const {
+            isETH,
+            feeWei,
+            decimals
+        } = getTokenInfo(network, token ? token : 'eth');
+
         try{
-            const {
-                isETH,
-                feeWei,
-                decimals
-            } = getTokenInfo(network, token ? token : 'eth');
 
             // simulate the transaction
             const profit = ethers.BigNumber.from(
@@ -158,11 +162,11 @@ const submitTx = async (
         }
 
         // TODO: Push nonce locking down to submission method and unit test it
-        const { blockNumber, transactionHash } = await lock.acquire("nonce_" + network, async () => {
+        const { blockNumber, transactionHash, gasUsed } = await lock.acquire("nonce_" + network, async () => {
           return sendTransaction(network, to, data, value);
         });
 
-        console.log("transaction processed", transactionHash)
+        console.log("transaction processed", transactionHash, "gasUsed",  gasUsed.toString())
 
         res.json({
           block: blockNumber,

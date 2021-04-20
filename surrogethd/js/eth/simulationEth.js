@@ -37,8 +37,9 @@ const buildSimTx = async (forkedWeb3, to, data, value) => {
  * to the specified account.
  */
 const simulateTx = async (network, to, data, value) => {
-  const forkedWeb3 = createForkedWeb3(network);
   const wallet = getWallet(network)
+  const gasPrice = await wallet.getGasPrice();
+  const forkedWeb3 = createForkedWeb3(network, gasPrice);
   const address = wallet.address
   const privateKey = getPrivateKey(network)
 
@@ -84,9 +85,10 @@ const simulateERC20Tx = async (network, token, to, data, value) => {
     }
   ];
 
-  const forkedWeb3 = createForkedWeb3(network);
-  const tokenContract = new forkedWeb3.eth.Contract(erc20BalanceOfAbi, token);
   const wallet = getWallet(network)
+  const gasPrice = await wallet.getGasPrice();
+  const forkedWeb3 = createForkedWeb3(network, gasPrice);
+  const tokenContract = new forkedWeb3.eth.Contract(erc20BalanceOfAbi, token);
   const address = wallet.address
   const privateKey = getPrivateKey(network)
 

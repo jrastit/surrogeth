@@ -14,11 +14,13 @@ const {
 /**
  * Create a forked version of web3 using the provided rpcUrl
  */
-const createForkedWeb3 = network => {
+const createForkedWeb3 = (network, gasPrice) => {
   const rpcUrl = getNetworkInfo(network).chainUrl;
+
   return new Web3(
     ganache.provider({
-      fork: rpcUrl
+      fork: rpcUrl,
+      gasPrice: gasPrice.toHexString()
     })
   );
 };
