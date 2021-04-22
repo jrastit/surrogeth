@@ -154,7 +154,7 @@ const submitTx = async (
             if (feeWei > 0 && profit.lt(feeWei)) {
               console.log("Transaction rejected, fee too low");
               return res.status(403).json({
-                msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatEther(feeWei.sub(profit))}`
+                msg: `Fee too low! Try increasing the fee by ${ethers.utils.formatUnits(feeWei.sub(profit), decimals)}`
               });
             }
         }catch(err){
@@ -162,11 +162,11 @@ const submitTx = async (
         }
 
         // TODO: Push nonce locking down to submission method and unit test it
-        const { blockNumber, transactionHash, gasUsed } = await lock.acquire("nonce_" + network, async () => {
+        const { blockNumber, transactionHash, gasUsed, gasPrice} = await lock.acquire("nonce_" + network, async () => {
           return sendTransaction(network, to, data, value);
         });
 
-        console.log("transaction processed", transactionHash, "gasUsed",  gasUsed.toString())
+        console.log("transaction processed", transactionHash, "gasUsed", gasUsed.toString(), "fee",  ethers.utils.formatUnits(gasUsed.mul(gasPrice), decimals))
 
         res.json({
           block: blockNumber,

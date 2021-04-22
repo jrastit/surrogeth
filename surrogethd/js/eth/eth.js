@@ -47,21 +47,31 @@ const sendTransaction = async (network, to, data, value) => {
 
   const nonce = await wallet.getTransactionCount("pending");
   //const gasLimit = await getGasLimit(wallet.provider);
-  //const gasPrice = await wallet.getGasPrice();
+  const gasPrice = await wallet.getGasPrice();
   const unsignedTx = {
     to,
     value: ethers.utils.parseUnits(value.toString(), "wei"),
     data,
     nonce,
     //gasLimit,
-    //gasPrice
+    gasPrice
   };
 
   //const signedTx = await wallet.signTransaction(unsignedTx);
 
   // Returns Promise<TransactionResponse>
   const txResponse = await wallet.sendTransaction(unsignedTx);
-  return await txResponse.wait();
+  const {
+      blockNumber,
+      transactionHash,
+      gasUsed
+  } = await txResponse.wait();
+  return {
+      blockNumber,
+      transactionHash,
+      gasUsed,
+      gasPrice 
+  }
 };
 
 module.exports = {
