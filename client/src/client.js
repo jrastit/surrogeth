@@ -193,14 +193,16 @@ class SurrogethClient {
                 {
                   token: this.token,
                   network: this.network
-                }
+              },
+              { timeout:5000}
               ):
               await axios.post(
                 `${this.protocol}://${getFeeETHRoute(locator)}`,
                 {
                   txGas: txGas,
                   network: this.network
-                }
+                },
+                { timeout:5000}
               );
 
           if (resp.status !== 200) {
